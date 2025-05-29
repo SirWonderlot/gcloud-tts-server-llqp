@@ -30,14 +30,13 @@ app.post('/speak', async (req, res) => {
 
     const [response] = await client.synthesizeSpeech(request);
 
-    // ✅ Assume audioContent is a Buffer already
     res.set({
       'Content-Type': 'audio/mpeg',
       'Content-Disposition': 'attachment; filename="output.mp3"'
     });
 
-    // ✅ Send as-is — don't decode
-    res.send(response.audioContent);
+    res.send(Buffer.from(response.audioContent, 'base64'));
+
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
