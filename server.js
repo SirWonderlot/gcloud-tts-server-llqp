@@ -21,30 +21,38 @@ app.post('/speak', async (req, res) => {
       input: { text },
       voice: {
         languageCode: 'en-US',
-        name: voiceType || 'en-US-Standard-I'
+        name: voiceType || 'en-US-Standard-I',
       },
       audioConfig: {
-        audioEncoding: 'MP3'
-      }
+        audioEncoding: 'MP3',
+      },
     };
 
     const [response] = await client.synthesizeSpeech(request);
 
+    // 🛠 Decode base64 audio
     const audioBuffer = Buffer.from(response.audioContent, 'base64');
 
+    // 🛑 Log raw audioContent snippet for debugging
+    console.log('Raw audioContent (first 100 chars):', response.audioContent.slice(0, 100));
+
+    if (!response.audioContent || response.audioContent.length < 50) {
+      console.error('🛑 Invalid or empty audioContent:', response.audioContent);
+    }
+
+    // ✅ Send the audio file properly
     res.set({
       'Content-Type': 'audio/mpeg',
       'Content-Disposition': 'attachment; filename="output.mp3"',
     });
     res.send(audioBuffer);
-
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
   }
 });
 
-// ✅ This MUST be at the root level — not inside another block
+// ✅ Start the server
 app.listen(port, () => {
   console.log(`🚀 TTS server running at http://localhost:${port}`);
 });
