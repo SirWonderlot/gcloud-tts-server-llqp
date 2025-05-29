@@ -3,10 +3,8 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const textToSpeech = require('@google-cloud/text-to-speech');
 const fs = require('fs');
-const util = require('util');
 
-// Set path to your service account key file
-process.env.GOOGLE_APPLICATION_CREDENTIALS = './service-account.json'; // Replace with your filename
+process.env.GOOGLE_APPLICATION_CREDENTIALS = './service-account.json';
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -32,13 +30,18 @@ app.post('/speak', async (req, res) => {
     };
 
     const [response] = await client.synthesizeSpeech(request);
-   res.set('Content-Type', 'audio/mpeg');
-res.send(Buffer.from(response.audioContent, 'base64'));
+
+    res.set({
+      'Content-Type': 'audio/mpeg',
+      'Content-Disposition': 'attachment; filename="output.mp3"'
+    });
+
+    res.send(Buffer.from(response.audioContent, 'base64'));
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
   }
-}); // ✅ This line was missing the closing brace above
+});
 
 app.listen(port, () => {
   console.log(`🚀 TTS server running at http://localhost:${port}`);
