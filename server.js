@@ -32,8 +32,8 @@ app.post('/speak', async (req, res) => {
     };
 
     const [response] = await client.synthesizeSpeech(request);
-    res.set('Content-Type', 'audio/mpeg');
-    res.send(response.audioContent);
+   res.set('Content-Type', 'audio/mpeg');
+res.send(Buffer.from(response.audioContent, 'base64'));
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
