@@ -17,42 +17,41 @@ app.post('/speak', async (req, res) => {
   try {
     const { text, voiceType } = req.body;
 
+    if (!text) {
+      throw new Error('No text provided in request body.');
+    }
+
     const request = {
       input: { text },
       voice: {
         languageCode: 'en-US',
-        name: voiceType || 'en-US-Standard-I',
+        name: voiceType || 'en-US-Standard-I'
       },
       audioConfig: {
-        audioEncoding: 'MP3',
-      },
+        audioEncoding: 'MP3'
+      }
     };
 
     const [response] = await client.synthesizeSpeech(request);
 
-    // 🛠 Decode base64 audio
-    const audioBuffer = Buffer.from(response.audioContent, 'base64');
-
-    // 🛑 Log raw audioContent snippet for debugging
-    console.log('Raw audioContent (first 100 chars):', response.audioContent.slice(0, 100));
-
-    if (!response.audioContent || response.audioContent.length < 50) {
-      console.error('🛑 Invalid or empty audioContent:', response.audioContent);
+    if (!response.audioContent) {
+      throw new Error('No audioContent received from TTS API.');
     }
 
-    // ✅ Send the audio file properly
+    const audioBuffer = Buffer.from(response.audioContent, 'base64');
+
     res.set({
       'Content-Type': 'audio/mpeg',
-      'Content-Disposition': 'attachment; filename="output.mp3"',
+      'Content-Disposition': 'attachment; filename="output.mp3"'
     });
     res.send(audioBuffer);
+
   } catch (err) {
     console.error('Error in /speak:', err);
-    res.status(500).send('TTS error');
+    res.status(500).send(`TTS error: ${err.message}`);
   }
 });
 
-// ✅ Start the server
 app.listen(port, () => {
   console.log(`🚀 TTS server running at http://localhost:${port}`);
 });
