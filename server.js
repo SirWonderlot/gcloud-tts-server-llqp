@@ -2,7 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const textToSpeech = require('@google-cloud/text-to-speech');
-const fs = require('fs');
 
 process.env.GOOGLE_APPLICATION_CREDENTIALS = './service-account.json';
 
@@ -31,12 +30,15 @@ app.post('/speak', async (req, res) => {
 
     const [response] = await client.synthesizeSpeech(request);
 
+    // ✅ Send proper response for MP3
     res.set({
       'Content-Type': 'audio/mpeg',
-      'Content-Disposition': 'attachment; filename="output.mp3"'
+      'Content-Disposition': 'inline; filename="output.mp3"'
     });
 
-    res.send(Buffer.from(response.audioContent, 'base64'));
+    // ✅ Decode properly from base64
+    const audioBuffer = Buffer.from(response.audioContent, 'base64');
+    res.send(audioBuffer);
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
