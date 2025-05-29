@@ -30,19 +30,16 @@ app.post('/speak', async (req, res) => {
 
     const [response] = await client.synthesizeSpeech(request);
 
+    // The content is Base64-encoded. Decode it correctly.
+    const audioBuffer = Buffer.from(response.audioContent, 'base64');
+
     res.set({
       'Content-Type': 'audio/mpeg',
-      'Content-Disposition': 'attachment; filename="output.mp3"'
+      'Content-Disposition': 'attachment; filename="output.mp3"',
     });
-
-    res.send(Buffer.from(response.audioContent, 'base64'));
-
+    res.send(audioBuffer);
   } catch (err) {
     console.error('Error in /speak:', err);
     res.status(500).send('TTS error');
   }
-});
-
-app.listen(port, () => {
-  console.log(`🚀 TTS server running at http://localhost:${port}`);
 });
