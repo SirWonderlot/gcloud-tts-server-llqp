@@ -17,27 +17,29 @@ app.use(bodyParser.json());
 const client = new textToSpeech.TextToSpeechClient();
 
 app.post('/speak', async (req, res) => {
- try {
-  const { text, voiceType } = req.body;
+  try {
+    const { text, voiceType } = req.body;
 
-  const request = {
-    input: { text },
-    voice: {
-      languageCode: 'en-US',
-      name: voiceType || 'en-US-Standard-I'
-    },
-    audioConfig: {
-      audioEncoding: 'MP3'
-    }
-  };
+    const request = {
+      input: { text },
+      voice: {
+        languageCode: 'en-US',
+        name: voiceType || 'en-US-Standard-I'
+      },
+      audioConfig: {
+        audioEncoding: 'MP3'
+      }
+    };
 
-  const [response] = await client.synthesizeSpeech(request);
-  res.set('Content-Type', 'audio/mpeg');
-  res.send(response.audioContent);
-} catch (err) {
-  console.error('Error in /speak:', err);
-  res.status(500).send('TTS error');
-}
+    const [response] = await client.synthesizeSpeech(request);
+    res.set('Content-Type', 'audio/mpeg');
+    res.send(response.audioContent);
+  } catch (err) {
+    console.error('Error in /speak:', err);
+    res.status(500).send('TTS error');
+  }
+}); // ✅ This line was missing the closing brace above
+
 app.listen(port, () => {
   console.log(`🚀 TTS server running at http://localhost:${port}`);
 });
