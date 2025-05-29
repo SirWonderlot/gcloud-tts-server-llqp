@@ -27,12 +27,12 @@ app.post('/speak', async (req, res) => {
         name: voiceType || 'en-US-Standard-I'
       },
       audioConfig: {
-        audioEncoding: 'MP3'
+       audioEncoding: 'LINEAR16'
       },
     };
 
     const [response] = await client.synthesizeSpeech(request);
-    res.set('Content-Type', 'audio/mpeg');
+    res.set('Content-Type', 'audio/wav');
     res.send(response.audioContent);
   } catch (err) {
     console.error('Error in /speak:', err);
